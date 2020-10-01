@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/IBM/portieris/helpers/credential"
 	"github.com/IBM/portieris/helpers/image"
 	securityenforcementv1beta1 "github.com/IBM/portieris/pkg/apis/securityenforcement/v1beta1"
 	"github.com/IBM/portieris/pkg/kubernetes"
@@ -34,11 +35,7 @@ import (
 	"github.com/golang/glog"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 )
-
-var codec = serializer.NewCodecFactory(runtime.NewScheme())
 
 // Controller is the notary controller
 type Controller struct {
@@ -166,22 +163,23 @@ func (c *Controller) mutatePodSpec(namespace, specPath string, pod corev1.PodSpe
 	return a.Flush()
 }
 
-func (c *Controller) getPodCredentials(namespace string, img *image.Reference, pod corev1.PodSpec) [][]string {
-	var creds [][]string
+func (c *Controller) getPodCredentials(namespace string, img *image.Reference, pod corev1.PodSpec) (creds credential.Credentials) {
 	for _, secret := range pod.ImagePullSecrets {
 		username, password, err := c.kubeClientsetWrapper.GetSecretToken(namespace, secret.Name, img.GetHostname())
 		if err != nil {
 			glog.Error(err)
 			continue
 		}
-		creds = append(creds, []string{username, password})
+		creds = append(creds, credential.Credential{
+			Username: username,
+			Password: password,
+		})
 		glog.Infof("ImagePullSecret %s/%s found", namespace, secret.Name)
 	}
-	return creds
+	return
 }
 
-func (c *Controller) verifiedDigestByPolicy(namespace string, img *image.Reference, credentials [][]string, policy *securityenforcementv1beta1.Policy) (*bytes.Buffer, error, error) {
-
+func (c *Controller) verifiedDigestByPolicy(namespace string, img *image.Reference, credentials credential.Credentials, policy *securityenforcementv1beta1.Policy) (*bytes.Buffer, error, error) {
 	// no policy indicates admission should be allowed, without mutation
 	if policy == nil {
 		return nil, nil, nil
