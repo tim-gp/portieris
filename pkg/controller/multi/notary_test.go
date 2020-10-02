@@ -731,6 +731,50 @@ var _ = Describe("Main", func() {
 				})
 			})
 
+			Context("if the pod has 2 containers and vulnerability enforcement enabled", func() {
+				It("should allow the image", func() {
+					imageRepos := `"repositories": [
+						{
+							"name": "us.icr.io/hello",
+							"policy": {
+								"trust": {
+									"enabled": true
+								},
+								"vulnerability": {
+									"IBMVA": {
+										"enabled": true
+									}					
+								}
+							}
+						},
+						{
+							"name": "icr.io/goodbye",
+							"policy": {
+								"trust": {
+									"enabled": true,
+									"trustServer": "https://some-trust-server.com:4443"
+								}
+							}
+						}
+					]`
+					clusterRepos := `"repositories": []`
+					fakeEnforcer(imageRepos, clusterRepos)
+					trust = &fakenotary.FakeNotary{} // Wipe out the stubbed good notary response that fakeEnforcer sets up
+					trust.GetNotaryRepoReturns(nil, fmt.Errorf("some error"))
+					trust.GetNotaryRepoReturns(nil, fmt.Errorf("some error"))
+					updateController()
+					req := newFakeRequestMultiContainerMultiSecret("us.icr.io/hello", "icr.io/goodbye")
+					wh.HandleAdmissionRequest(w, req)
+					parseResponse()
+					Expect(len(trust.GetNotaryRepoArgsForCall)).To(Equal(2))
+					Expect(trust.GetNotaryRepoArgsForCall[0].Server).To(Equal("https://us.icr.io:4443"))
+					Expect(trust.GetNotaryRepoArgsForCall[0].Image).To(Equal("us.icr.io/hello"))
+					Expect(trust.GetNotaryRepoArgsForCall[1].Server).To(Equal("https://some-trust-server.com:4443"))
+					Expect(trust.GetNotaryRepoArgsForCall[1].Image).To(Equal("icr.io/goodbye"))
+					Expect(resp.Response.Allowed).To(BeFalse())
+				})
+			})
+
 			Context("if request container initContainers with non-compliant images", func() {
 				It("should deny the admission of the request", func() {
 					imageRepos := `"repositories": [

@@ -37,7 +37,7 @@ import (
 type Controller struct {
 	// kubeClientsetWrapper is a standard kubernetes clientset with a wrapper for retrieving podSpec from a given object
 	kubeClientsetWrapper kubernetes.WrapperInterface
-	// policyClient is a securityenforcementclientset with a wrapper for retrieving the relevent policy spec
+	// policyClient is a securityenforcementclientset with a wrapper for retrieving the relevant policy spec
 	policyClient policy.Interface
 	Enforcer
 }
@@ -91,7 +91,6 @@ func (c *Controller) admitPod(namespace, specPath string, pod corev1.PodSpec) *a
 			return a.Flush()
 		}
 
-		//TODO reconsider name of function at some point
 		newPatches, denials, err := c.getPatchesForContainers(containerType, namespace, specPath, pod, containers)
 		a.StringsToAdmissionResponse(denials)
 		if err != nil {

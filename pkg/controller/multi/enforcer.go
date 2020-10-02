@@ -1,3 +1,17 @@
+// Copyright 2020 Portieris Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package multi
 
 import (
@@ -15,6 +29,7 @@ import (
 	"github.com/golang/glog"
 )
 
+// Enforcer is an interface that enforces pod admission based on a configured policy
 type Enforcer interface {
 	DigestByPolicy(string, *image.Reference, credential.Credentials, *securityenforcementv1beta1.Policy) (*bytes.Buffer, error, error)
 	VulnerabilityPolicy(*image.Reference, credential.Credentials, *securityenforcementv1beta1.Policy) vulnerability.ScanResponse
@@ -29,6 +44,7 @@ type enforcer struct {
 	scannerFactory vulnerability.ScannerFactory
 }
 
+// NewEnforcer returns an enforce that wraps the kubenetes interface and a notary verifier
 func NewEnforcer(kubeClientsetWrapper kubernetes.WrapperInterface, nv *notaryverifier.Verifier) Enforcer {
 	scannerFactory := vulnerability.NewScannerFactory()
 	return &enforcer{

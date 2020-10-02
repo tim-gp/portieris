@@ -1,4 +1,4 @@
-// Copyright 2018, 2020 Portieris Authors.
+// Copyright 2020 Portieris Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,10 @@
 
 package credential
 
+// Credentials is a slice of username/password combinations
 type Credentials []Credential
 
+// Credential will hold a username/password combination from a pull secret in the pod being considered for admission
 type Credential struct {
 	Username string
 	Password string

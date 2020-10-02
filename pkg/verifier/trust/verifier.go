@@ -1,4 +1,4 @@
-// Copyright 2018 Portieris Authors.
+// Copyright 2018, 2020 Portieris Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,11 +27,7 @@ import (
 	registryclient "github.com/IBM/portieris/pkg/registry"
 	"github.com/golang/glog"
 	store "github.com/theupdateframework/notary/storage"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 )
-
-var codec = serializer.NewCodecFactory(runtime.NewScheme())
 
 // Verifier is the notary controller
 type Verifier struct {

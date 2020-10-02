@@ -94,7 +94,7 @@ func (a *AdmissionResponder) StringToAdmissionResponse(msg string) {
 	a.errors = append(a.errors, msg)
 }
 
-// StringToAdmissionResponse adds a string as an error to the response
+// StringsToAdmissionResponse adds a slice of strings as errors to the response
 func (a *AdmissionResponder) StringsToAdmissionResponse(msgs []string) {
 	for _, msg := range msgs {
 		a.StringToAdmissionResponse(msg)
