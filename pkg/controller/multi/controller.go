@@ -143,8 +143,11 @@ func (c *Controller) getPatchesForContainers(containerType, namespace, specPath 
 
 		credentialCandidates := c.getPodCredentials(namespace, img, pod)
 
-			digest, deny, err := c.verifiedDigestByPolicy(namespace, img, credentialCandidates, containerPolicy)
-			if err != nil {
+		scanResponse := c.Enforcer.VulnerabilityPolicy(img, credentialCandidates, containerPolicy)
+		if !scanResponse.CanDeploy {
+			denials = append(denials, scanResponse.DenyReason)
+		}
+
 		digest, deny, err := c.Enforcer.DigestByPolicy(namespace, img, credentialCandidates, containerPolicy)
 		if err != nil {
 			return patches, denials, err

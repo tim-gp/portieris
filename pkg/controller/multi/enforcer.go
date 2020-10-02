@@ -17,6 +17,7 @@ import (
 
 type Enforcer interface {
 	DigestByPolicy(string, *image.Reference, credential.Credentials, *securityenforcementv1beta1.Policy) (*bytes.Buffer, error, error)
+	VulnerabilityPolicy(*image.Reference, credential.Credentials, *securityenforcementv1beta1.Policy) vulnerability.ScanResponse
 }
 
 type enforcer struct {
@@ -24,12 +25,16 @@ type enforcer struct {
 	kubeClientsetWrapper kubernetes.WrapperInterface
 	// nv notary verifier
 	nv *notaryverifier.Verifier
+	// scannerFactory creates new vulnerabilities scanners according to the policy
+	scannerFactory vulnerability.ScannerFactory
 }
 
 func NewEnforcer(kubeClientsetWrapper kubernetes.WrapperInterface, nv *notaryverifier.Verifier) Enforcer {
+	scannerFactory := vulnerability.NewScannerFactory()
 	return &enforcer{
 		kubeClientsetWrapper: kubeClientsetWrapper,
 		nv:                   nv,
+		scannerFactory:       &scannerFactory,
 	}
 }
 
@@ -88,4 +93,24 @@ func (e enforcer) DigestByPolicy(namespace string, img *image.Reference, credent
 	}
 
 	return digest, nil, nil
+}
+
+func (e *enforcer) VulnerabilityPolicy(img *image.Reference, credentials credential.Credentials, policy *securityenforcementv1beta1.Policy) vulnerability.ScanResponse {
+	scanners := e.scannerFactory.GetScanners(*img, credentials, *policy)
+	// If the policy has IBMVA enabled, append the correct scanner
+	// Loop round all scanners and check if the image can be deployed
+	// If any scanner returns either an error, or a CanDeploy=false, the pod will not be admitted
+	for _, scanner := range scanners {
+		response, err := scanner.CanImageDeployBasedOnVulnerabilities(*img)
+		if err != nil {
+			return vulnerability.ScanResponse{CanDeploy: false, DenyReason: err.Error()}
+		}
+		if !response.CanDeploy {
+			return response
+		}
+	}
+	if len(scanners) == 0 {
+		glog.Infof("No vulnerability scanners enabled by policy for image %q", img.String())
+	}
+	return vulnerability.ScanResponse{CanDeploy: true}
 }
