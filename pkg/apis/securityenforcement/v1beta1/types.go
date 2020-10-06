@@ -91,8 +91,9 @@ type Repository struct {
 
 // Policy .
 type Policy struct {
-	Trust  Trust  `json:"trust,omitempty"`
-	Simple Simple `json:"simple,omitempty"`
+	Trust         Trust         `json:"trust,omitempty"`
+	Simple        Simple        `json:"simple,omitempty"`
+	Vulnerability Vulnerability `json:"vulnerability,omitempty"`
 }
 
 // Trust .
@@ -126,6 +127,9 @@ type IdentityRequirement struct {
 	Type             string `json:"type"`
 	DockerReference  string `json:"dockerReference,omitEmpty"`
 	DockerRepository string `json:"dockerRepository,omitEmpty"`
+}
+
+type Vulnerability struct {
 }
 
 // FindImagePolicy - Given an ImagePolicyList, find the repository whose name
