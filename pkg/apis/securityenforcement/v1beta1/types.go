@@ -130,6 +130,12 @@ type IdentityRequirement struct {
 }
 
 type Vulnerability struct {
+	IBMVA IBMVA `json:"IBMVA,omitempty"`
+}
+
+type IBMVA struct {
+	Enabled *bool  `json:"enabled,omitempty"`
+	Account string `json:"account,omitempty"`
 }
 
 // FindImagePolicy - Given an ImagePolicyList, find the repository whose name
@@ -215,7 +221,7 @@ Exact:
 				}
 			}
 			// glog.Infof("match: %t  matchQuality: %d", match, matchQuality)
-			if match == true && matchQuality > bestMatchQuality {
+			if match && matchQuality > bestMatchQuality {
 				// glog.Info("Updating to this match")
 				bestMatchQuality = matchQuality
 				bestMatchedPolicy = repo.Policy
