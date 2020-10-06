@@ -173,7 +173,7 @@ Exact:
 				}
 			}
 			// glog.Infof("match: %t  matchQuality: %d", match, matchQuality)
-			if match == true && matchQuality > bestMatchQuality {
+			if match && matchQuality > bestMatchQuality {
 				// glog.Info("Updating to this match")
 				bestMatchQuality = matchQuality
 				bestMatchedPolicy = repo.Policy
