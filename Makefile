@@ -95,7 +95,7 @@ e2e.clean: helm.clean
 .PHONY: code-generator regenerate
 
 code-generator:
-	git clone https://github.com/kubernetes/code-generator.git --branch irelease-1.15 $(GOPATH)/src/k8s.io/code-generator
+	git clone https://github.com/kubernetes/code-generator.git --branch v0.17.3 $(GOPATH)/src/k8s.io/code-generator
 
 regenerate:
 	$(GOPATH)/src/k8s.io/code-generator/generate-groups.sh all github.com/IBM/portieris/pkg/apis/securityenforcement/client github.com/IBM/portieris/pkg/apis securityenforcement:v1beta1
