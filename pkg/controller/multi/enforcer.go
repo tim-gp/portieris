@@ -130,8 +130,6 @@ func (e *enforcer) VulnerabilityPolicy(img *image.Reference, credentials credent
 			return response
 		}
 	}
-	if len(scanners) == 0 {
-		glog.Infof("No vulnerability scanners enabled by policy for image %q", img.String())
-	}
+
 	return vulnerability.ScanResponse{CanDeploy: true}
 }
