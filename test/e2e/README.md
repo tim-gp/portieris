@@ -10,4 +10,5 @@ The tests can be run with the following steps:
 5. Export the HUB variable pointing to your new ICCR namespace: `export HUB=uk.icr.io/yournamespace`
 6. After completing your code changes, build and push the image to your namespace: `make push`
 7. Install portieris into your cluster: `helm install helm/portieris`
-8. Run `make e2e.local`
+8. Export `E2E_ACCOUNT_HEADER` - a maintainer can tell you what to set
+9. Run `make e2e.quick`
